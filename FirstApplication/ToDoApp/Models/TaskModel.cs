@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using ToDoApp.Enums;
 
 namespace ToDoApp.Models
 {
@@ -11,6 +13,6 @@ namespace ToDoApp.Models
         [Column("description")]
         public string? Description { get; set; }
         [Column("status")]
-        public int Status { get; set; }
+        public StatusTaskEnum Status { get; set; }
     }
 }

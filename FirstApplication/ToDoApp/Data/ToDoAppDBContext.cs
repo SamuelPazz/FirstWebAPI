@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ToDoApp.Data.Map;
 using ToDoApp.Models;
 
 namespace ToDoApp.Data
@@ -15,7 +16,9 @@ namespace ToDoApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfiguration(new UserMap());
+            modelBuilder.ApplyConfiguration(new TaskMap());
+            base.OnModelCreating(modelBuilder); 
         }
     }
 }

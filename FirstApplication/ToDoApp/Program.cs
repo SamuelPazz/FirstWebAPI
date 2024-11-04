@@ -13,10 +13,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddEntityFrameworkSqlServer()
-    .AddDbContext<ToDoAppDBContext>(
-        options => options.UseSqlServer(builder.Configuration.GetConnectionString("Database"))
-    );
+builder.Services.AddDbContext<ToDoAppDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Database"))
+);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 

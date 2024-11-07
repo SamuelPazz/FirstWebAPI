@@ -16,7 +16,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ToDoAppDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Database"))
 );
-
+ 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
@@ -35,3 +35,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+app.MapGet("api", () => "Hello world");

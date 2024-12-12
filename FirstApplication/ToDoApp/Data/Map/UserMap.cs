@@ -11,7 +11,6 @@ namespace ToDoApp.Data.Map
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Name).IsRequired().HasMaxLength(255);
             builder.Property(x => x.Email).IsRequired().HasMaxLength(150);
-            throw new NotImplementedException();
         }
     }
 }

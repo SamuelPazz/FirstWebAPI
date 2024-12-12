@@ -13,11 +13,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<ToDoAppDBContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Database"))
-);
- 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+
+builder.Services.AddDbContext<ToDoAppDBContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Database"))
+);
 
 var app = builder.Build();
 

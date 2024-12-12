@@ -6,19 +6,15 @@ namespace ToDoApp.Data
 {
     public class ToDoAppDBContext : DbContext
     {
-        public ToDoAppDBContext(DbContextOptions<ToDoAppDBContext> options)
-            :base(options) 
-        { 
-        }
-        
+        public ToDoAppDBContext(DbContextOptions options) : base(options) { }
+
         public DbSet<UserModel> Users { get; set; }
         public DbSet<TaskModel> Tasks { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            modelBuilder.ApplyConfiguration(new UserMap());
-            modelBuilder.ApplyConfiguration(new TaskMap());
-            base.OnModelCreating(modelBuilder); 
+            base.OnModelCreating(builder);
+            builder.ApplyConfigurationsFromAssembly(typeof(ToDoAppDBContext).Assembly);
         }
     }
 }

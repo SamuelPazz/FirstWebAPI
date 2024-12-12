@@ -14,5 +14,8 @@ namespace ToDoApp.Models
         public string? Description { get; set; }
         [Column("status")]
         public StatusTaskEnum Status { get; set; }
+        [Column("user_id")]
+        public int? UserId { get; set; }
+        public virtual UserModel? User { get; set; }
     }
 }

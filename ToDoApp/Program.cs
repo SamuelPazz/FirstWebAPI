@@ -7,20 +7,26 @@ using System.Text;
 using ToDoApp.Data;
 using ToDoApp.Repositories;
 using ToDoApp.Repositories.Interfaces;
+using ToDoApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var configuration = builder.Configuration;
 
-var authKey = configuration.GetValue<string>("Keys:AuthKey");
+configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+var authKey = configuration["Jwt:AuthKey"];
 
 // Add services to the container.
+
+builder.Logging.AddConsole();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 
@@ -40,8 +46,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = "sua_empresa",
-        ValidAudience = "sua_aplicacao",
+        ValidIssuer = configuration["Jwt:Issuer"],            
+        ValidAudience = configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authKey))
     };
 });

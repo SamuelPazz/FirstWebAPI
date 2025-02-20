@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using ToDoApp.Data;
+using ToDoApp.DTOs;
 using ToDoApp.Models;
 using ToDoApp.Repositories.Interfaces;
 
@@ -14,30 +16,43 @@ namespace ToDoApp.Repositories
             _dbContext = toDoAppDBContext;
         }
 
+        public async Task<List<UserModel>?> FindAllUsersAsync()
+        {
+            var result =  await _dbContext.Users.ToListAsync();
+
+            if (!result.Any()) 
+                return null;
+
+            return result;
+        }
+
         public async Task<UserModel?> FindByIdAsync(int id)
-        {
-            return await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+        {       
+            var result =  await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (result == null)
+                return null;
+
+            return result;
         }
 
-        public async Task<List<UserModel>> FindAllUsersAsync()
+        public async Task<UserModel?> SaveUserAsync(UserModel user)
         {
-            return await _dbContext.Users.ToListAsync();
-        }
+            if (user == null)
+                return null;
 
-        public async Task<UserModel> SaveUserAsync(UserModel user)
-        {
-            await _dbContext.Users.AddAsync(user);
+            await _dbContext.Users.AddAsync(user);          
             await _dbContext.SaveChangesAsync();
 
             return user;
         }
 
-        public async Task<UserModel> UpdateUserByIdAsync(UserModel user, int id)
+        public async Task<UserModel?> UpdateUserByIdAsync(UserModel user, int id)
         {
-            UserModel userById = await FindByIdAsync(id);
+            UserModel? userById = await FindByIdAsync(id);
 
             if (userById == null)
-                throw new Exception($"User not found by ID: {id}");
+                return null;
 
             userById.Name = user.Name;
             userById.Email = user.Email;
@@ -51,15 +66,26 @@ namespace ToDoApp.Repositories
 
         public async Task<bool> DeleteUserByIdAsync(int id)
         {
-            UserModel userById = await FindByIdAsync(id);
+            UserModel? userById = await FindByIdAsync(id);
 
             if (userById == null)
-                throw new Exception($"User not found by ID: {id}");
+                return false;
 
             _dbContext.Users.Remove(userById);
             await _dbContext.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<UserModel?> FindyByLogin(UserLoginDTO login)
+        {
+            var user = await _dbContext.Users
+                .FirstOrDefaultAsync(x => x.Email == login.Email && x.Password == login.Password);
+
+            if (user == null)
+                return null;
+
+            return user;
         }
     }
 }

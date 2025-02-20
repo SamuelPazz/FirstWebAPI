@@ -16,32 +16,45 @@ namespace ToDoApp.Repositories
 
         public async Task<TaskModel?> FindByIdAsync(int id)
         {
-            return await _dbContext.Tasks
+            var result =  await _dbContext.Tasks
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (result == null)
+                return null;
+
+            return result;
         }
 
-        public async Task<List<TaskModel>> FindAllTasksAsync()
+        public async Task<List<TaskModel>?> FindAllTasksAsync()
         {
-            return await _dbContext.Tasks
-                .Include (x => x.User)
+            var result = await _dbContext.Tasks
+                .Include(x => x.User)
                 .ToListAsync();
+
+            if (!result.Any()) 
+                return null;
+
+            return result;
         }
 
-        public async Task<TaskModel> SaveTaskAsync(TaskModel task)
+        public async Task<TaskModel?> SaveTaskAsync(TaskModel task)
         {
+            if (task == null) 
+                return null;
+
             await _dbContext.Tasks.AddAsync(task);
             await _dbContext.SaveChangesAsync();
 
             return task;
         }
 
-        public async Task<TaskModel> UpdateTaskByIdAsync(TaskModel task, int id)
+        public async Task<TaskModel?> UpdateTaskByIdAsync(TaskModel task, int id)
         {
-            TaskModel taskById = await FindByIdAsync(id);
+            TaskModel? taskById = await FindByIdAsync(id);
 
             if (taskById == null)
-                throw new Exception($"Task not found by ID: {id}");
+                return null;
 
             taskById.Name = task.Name;
             taskById.Status = task.Status;
@@ -56,10 +69,10 @@ namespace ToDoApp.Repositories
 
         public async Task<bool> DeleteTaskByIdAsync(int id)
         {
-            TaskModel taskById = await FindByIdAsync(id);
+            TaskModel? taskById = await FindByIdAsync(id);
 
             if (taskById == null)
-                throw new Exception($"Task not found by ID: {id}");
+                return false;
 
             _dbContext.Tasks.Remove(taskById);
             await _dbContext.SaveChangesAsync();

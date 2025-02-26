@@ -19,6 +19,26 @@ namespace ToDoApp.Controllers
             this._logger = logger;
         }
 
+        [HttpPost]
+        public async Task<ActionResult<TaskModel>> CreateTaskAsync([FromBody] TaskModel task)
+        {
+            try
+            {
+                TaskModel? createdTask = await _taskRepository.SaveTaskAsync(task);
+
+                if (createdTask == null)
+                    return StatusCode(404, "Task not created or not found");
+
+                return StatusCode(201, createdTask);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in CreateTaskAsync {ex}");
+                return StatusCode(500, ex.Message);
+            }
+
+        }
+
         [HttpGet]
         public async Task<ActionResult<List<TaskModel>>> GetAllTasksAsync()
         {
@@ -27,9 +47,9 @@ namespace ToDoApp.Controllers
                 List<TaskModel>? tasks = await _taskRepository.FindAllTasksAsync();
                 
                 if (tasks == null) 
-                    return NotFound("Tasks not found");
+                    return StatusCode(204, "Tasks not found");
 
-                return Ok(tasks);
+                return StatusCode(200, tasks);
             }
 
             catch (Exception ex)
@@ -38,6 +58,7 @@ namespace ToDoApp.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
         [HttpGet("ById/{id}")]
         public async Task<ActionResult<TaskModel>> GetTaskByIdAsync(int id)
         {
@@ -46,9 +67,9 @@ namespace ToDoApp.Controllers
                 TaskModel? findedTask = await _taskRepository.FindByIdAsync(id);
 
                 if (findedTask == null)
-                    return NotFound("Task not found");
+                    return StatusCode(404, "Task not found");
 
-                return Ok(findedTask);
+                return StatusCode(200, findedTask);
             }
             catch (Exception ex)
             {
@@ -58,25 +79,6 @@ namespace ToDoApp.Controllers
 
         }
 
-        [HttpPost]
-        public async Task<ActionResult<TaskModel>> CreateTaskAsync([FromBody] TaskModel task)
-        {
-            try
-            {
-                TaskModel? createdTask = await _taskRepository.SaveTaskAsync(task);
-
-                if (createdTask == null)
-                    return NotFound("Task not created or not found");
-
-                return Ok(createdTask);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in CreateTaskAsync {ex}");
-                return StatusCode(500, ex.Message);
-            }
-
-        }
         [HttpPut("ById/{id}")]
         public async Task<ActionResult<TaskModel>> UpdateTaskAsync([FromBody] TaskModel task, int id)
         {
@@ -86,9 +88,9 @@ namespace ToDoApp.Controllers
                 TaskModel? findedTask = await _taskRepository.UpdateTaskByIdAsync(task, id);
 
                 if (findedTask == null)
-                    return NotFound("Task not found");
+                    return StatusCode(404, "Task not found");
 
-                return Ok(findedTask);
+                return StatusCode(200, findedTask);
             }
             catch (Exception ex)
             {
@@ -96,17 +98,18 @@ namespace ToDoApp.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
         [HttpDelete("ById/{id}")]
-        public async Task<ActionResult<TaskModel>> DeleteTaskAsync(int id)
+        public async Task<ActionResult<bool>> DeleteTaskAsync(int id)
         {
             try
             {
                 bool result = await _taskRepository.DeleteTaskByIdAsync(id);
 
                 if (!result)
-                    return NotFound("Task not found to be deleted");
+                    return StatusCode(404, "Task not found to be deleted");
                 
-                return Ok(result);
+                return StatusCode(200, result);
             }
             catch(Exception ex)
             {

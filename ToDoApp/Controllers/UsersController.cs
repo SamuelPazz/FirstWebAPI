@@ -24,6 +24,26 @@ namespace ToDoApp.Controllers
             this._jwtTokenService = jwtTokenService;
         }
 
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<ActionResult<UserModel>> CreateUserAsync([FromBody] UserModel user)
+        {
+            try
+            {
+                UserModel? createdUser = await _userRepository.SaveUserAsync(user);
+
+                if (createdUser == null)
+                    return StatusCode(404, "User not created or not found");
+
+                return StatusCode(201, createdUser);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in CreateUserAsync: {ex}");
+                return StatusCode(500, "An unexpected error occurred.");
+            }
+        }
+
         [HttpGet]
         public async Task<ActionResult<List<UserModel>>?> GetAllUsersAsync()
         {
@@ -32,9 +52,9 @@ namespace ToDoApp.Controllers
                 List<UserModel>? users =  await _userRepository.FindAllUsersAsync();
 
                 if (users == null)
-                    return NotFound("Users not found");
+                    return StatusCode(204, "Users not found");
                 
-                return Ok(users);
+                return StatusCode(200, users);
             }
             catch(Exception ex)
             {
@@ -51,9 +71,9 @@ namespace ToDoApp.Controllers
                 UserModel? findedUser = await _userRepository.FindByIdAsync(id);
 
                 if(findedUser == null)
-                    return NotFound("User not found");
+                    return StatusCode(404, "User not found");
 
-                return Ok(findedUser);
+                return StatusCode(200, findedUser);
             }
             catch (Exception ex)
             {
@@ -62,26 +82,6 @@ namespace ToDoApp.Controllers
                 return StatusCode(500, "An unexpected error occurred.");
             }
 
-        }
-
-        [AllowAnonymous]
-        [HttpPost]
-        public async Task<ActionResult<UserModel>> CreateUserAsync([FromBody] UserModel user)
-        {
-            try
-            {
-                UserModel? createdUser = await _userRepository.SaveUserAsync(user);
-
-                if (createdUser == null)
-                    return NotFound("User not created or not found");
-
-                return Ok(createdUser);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in CreateUserAsync: {ex}");
-                return StatusCode(500, "An unexpected error occurred.");
-            }
         }
 
         [HttpPut("ById/{id}")]
@@ -93,9 +93,9 @@ namespace ToDoApp.Controllers
                 UserModel? findedUser = await _userRepository.UpdateUserByIdAsync(user, id);
 
                 if (findedUser == null)
-                    return NotFound("User not found");
+                    return StatusCode(404, "User not found");
 
-                return Ok(findedUser);
+                return StatusCode(200, findedUser);
             }
             catch(Exception ex)
             {
@@ -112,9 +112,9 @@ namespace ToDoApp.Controllers
                 bool result = await _userRepository.DeleteUserByIdAsync(id);
 
                 if (result == false)
-                    return NotFound("User not found to be deleted");
+                    return StatusCode(404, "User not found to be deleted");
 
-                return Ok(result);
+                return StatusCode(200, result);
             }
             catch (Exception ex)
             {

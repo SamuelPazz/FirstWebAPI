@@ -6,16 +6,23 @@ namespace ToDoApp.Models
 {
     public class TaskModel
     {
-        [Column("id")]
-        public int Id { get; set; }
-        [Column("name")]
-        public string? Name { get; set; }
-        [Column("description")]
-        public string? Description { get; set; }
-        [Column("status")]
-        public StatusTaskEnum Status { get; set; }
+        public Guid Id { get; set; }
+
+        [Required(ErrorMessage = "name is required")]
+        [MinLength(3, ErrorMessage = "name must have a minimum of 3 characters")]
+        [MaxLength(100, ErrorMessage = "name must have a maximum of 100 characters")]
+        public required string Name { get; set; }
+
+        [Required(ErrorMessage = "description is required")]
+        [MinLength(3, ErrorMessage = "name must have a minimum of 3 characters")]
+        [MaxLength(1000, ErrorMessage = "name must have a maximum of 1000 characters")]
+        public required string Description { get; set; }
+
+        [Required(ErrorMessage = "status is required")]
+        public required StatusTaskEnum Status { get; set; }
+
         [Column("user_id")]
-        public int? UserId { get; set; }
+        public Guid? UserId { get; set; }
         public virtual UserModel? User { get; set; }
     }
 }

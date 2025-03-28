@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ToDoApp.DTOs;
+using ToDoApp.DTOs.Requests;
+using ToDoApp.DTOs.Responses;
 using ToDoApp.Models;
 using ToDoApp.Repositories.Interfaces;
 using ToDoApp.Services;
+using ToDoApp.Services.Interfaces;
 
 namespace ToDoApp.Controllers
 {
@@ -12,115 +15,58 @@ namespace ToDoApp.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly ILogger<UsersController> _logger;
-        private readonly JwtTokenService _jwtTokenService;
+        private readonly IUserService _userService;
 
-
-        public UsersController(IUserRepository userRepository, ILogger<UsersController> logger, JwtTokenService jwtTokenService)
+        public UsersController(IUserService userService)
         {
-            this._logger = logger;
-            this._userRepository = userRepository;
-            this._jwtTokenService = jwtTokenService;
+            _userService = userService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<UserModel>>?> GetAllUsersAsync()
+        public async Task<IActionResult> GetAllUsersAsync()
         {
-            try
-            {
-                List<UserModel>? users =  await _userRepository.FindAllUsersAsync();
+            List<UserResponseDto> users = await _userService.ListAllUsersAsync();
 
-                if (users == null)
-                    return NotFound("Users not found");
-                
-                return Ok(users);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError($"Error in GetAllUsersAsync: {ex}");
-                return StatusCode(500, "An unexpected error occurred.");
-            }          
+            if (users.Count == 0)            
+                return StatusCode(204); 
+
+            return StatusCode(200, users); 
         }
 
-        [HttpGet("ById/{id}")]
-        public async Task<ActionResult<UserModel>> GetUserByIdAsync(int id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserByIdAsync(int id)
         {
-            try
-            {
-                UserModel? findedUser = await _userRepository.FindByIdAsync(id);
-
-                if(findedUser == null)
-                    return NotFound("User not found");
-
-                return Ok(findedUser);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in GetUserByIdAsync: {ex}");
-
-                return StatusCode(500, "An unexpected error occurred.");
-            }
-
+            UserResponseDto user = await _userService.UserByIdAsync(id);
+            return Ok(user);
         }
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<ActionResult<UserModel>> CreateUserAsync([FromBody] UserModel user)
+        public async Task<IActionResult> AddUserAsync([FromBody] UserModel user)
         {
-            try
-            {
-                UserModel? createdUser = await _userRepository.SaveUserAsync(user);
-
-                if (createdUser == null)
-                    return NotFound("User not created or not found");
-
-                return Ok(createdUser);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in CreateUserAsync: {ex}");
-                return StatusCode(500, "An unexpected error occurred.");
-            }
+            UserResponseDto createdUser = await _userService.CreateUserAsync(user);
+            return StatusCode(201, createdUser);
         }
 
-        [HttpPut("ById/{id}")]
-        public async Task<ActionResult<UserModel>> UpdateUserAsync([FromBody] UserModel user, int id)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUserAsync(int id, [FromBody] UserModel user)
         {
-            try
-            {
-                user.Id = id;
-                UserModel? findedUser = await _userRepository.UpdateUserByIdAsync(user, id);
-
-                if (findedUser == null)
-                    return NotFound("User not found");
-
-                return Ok(findedUser);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError($"Error in UpdateUserAsync: {ex}");
-                return StatusCode(500, "An unexpected error occurred.");
-            }
+            UserResponseDto updatedUser = await _userService.UpdateUserAsync(user, id);
+            return StatusCode(200, updatedUser);
         }
 
-        [HttpDelete("ById/{id}")]
-        public async Task<ActionResult<bool>> DeleteUserAsync(int id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUserAsync(int id)
         {
-            try
-            {
-                bool result = await _userRepository.DeleteUserByIdAsync(id);
-
-                if (result == false)
-                    return NotFound("User not found to be deleted");
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in DeleteUserByIdAsync: {ex}");
-                return StatusCode(500, "An unexpected error occurred.");
-            }
+            bool result = await _userService.RemoveUserAsync(id);
+            return StatusCode(200, result);
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginAsync([FromBody] UserLoginDTO login)
+        {
+            string token = await _userService.LoginAndAuthenticationAsync(login);
+            return StatusCode(200, token); 
+        }        
     }
 }

@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using ToDoApp.DTOs.Responses;
 using ToDoApp.Models;
 
 namespace ToDoApp.Services
@@ -17,19 +18,19 @@ namespace ToDoApp.Services
 
         public string GenerateTokenJWT(UserModel user)
         {
-            var secretKey = _configuration["Jwt:AuthKey"];
+            string? secretKey = _configuration["Jwt:AuthKey"];
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
-            {
+            Claim[] claims =
+            [
                 new Claim("login", user.Email),
                 new Claim("name", user.Name),
-            };
+            ];
 
-            var token = new JwtSecurityToken(
+            JwtSecurityToken token = new JwtSecurityToken(
                 _configuration["Jwt:Issuer"],
                 _configuration["Jwt:Audience"],
                 claims: claims,

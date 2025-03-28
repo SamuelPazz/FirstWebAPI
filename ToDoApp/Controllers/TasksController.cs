@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using ToDoApp.DTOs.Responses;
 using ToDoApp.Models;
-using ToDoApp.Repositories;
-using ToDoApp.Repositories.Interfaces;
+using ToDoApp.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+
 namespace ToDoApp.Controllers
 {
     [Authorize]
@@ -10,109 +11,54 @@ namespace ToDoApp.Controllers
     [ApiController]
     public class TasksController : ControllerBase
     {
-        private readonly ITaskRepository _taskRepository;
-        private readonly ILogger<TasksController> _logger;
+        private readonly ITaskService _taskService;
 
-        public TasksController(ITaskRepository taskRepository, ILogger<TasksController> logger)
+        public TasksController(ITaskService taskService)
         {
-            this._taskRepository = taskRepository;
-            this._logger = logger;
+            _taskService = taskService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<TaskModel>>> GetAllTasksAsync()
+        public async Task<IActionResult> GetAllTasksAsync()
         {
-            try
-            {
-                List<TaskModel>? tasks = await _taskRepository.FindAllTasksAsync();
-                
-                if (tasks == null) 
-                    return NotFound("Tasks not found");
+            List<TaskResponseDto> tasks = await _taskService.ListAllTasksAsync();
 
-                return Ok(tasks);
-            }
+            if (!tasks.Any())
+                return StatusCode(204); 
 
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in GetAllTasksAsync {ex}");
-                return StatusCode(500, ex.Message);
-            }
+            return StatusCode(200, tasks); 
         }
-        [HttpGet("ById/{id}")]
-        public async Task<ActionResult<TaskModel>> GetTaskByIdAsync(int id)
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetTaskByIdAsync(Guid id)
         {
-            try
-            {
-                TaskModel? findedTask = await _taskRepository.FindByIdAsync(id);
+            TaskResponseDto task = await _taskService.TaskByIdAsync(id);
 
-                if (findedTask == null)
-                    return NotFound("Task not found");
-
-                return Ok(findedTask);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in GetTaskByIdAsync {ex}");
-                return StatusCode(500, ex.Message);
-            }
-
+            return StatusCode(200, task);
         }
 
         [HttpPost]
-        public async Task<ActionResult<TaskModel>> CreateTaskAsync([FromBody] TaskModel task)
+        public async Task<IActionResult> AddTaskAsync([FromBody] TaskModel task)
         {
-            try
-            {
-                TaskModel? createdTask = await _taskRepository.SaveTaskAsync(task);
+            TaskResponseDto createdTask = await _taskService.CreateTaskAsync(task);
 
-                if (createdTask == null)
-                    return NotFound("Task not created or not found");
-
-                return Ok(createdTask);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in CreateTaskAsync {ex}");
-                return StatusCode(500, ex.Message);
-            }
-
+            return StatusCode(201, createdTask); 
         }
-        [HttpPut("ById/{id}")]
-        public async Task<ActionResult<TaskModel>> UpdateTaskAsync([FromBody] TaskModel task, int id)
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTaskAsync(Guid id, [FromBody] TaskModel task)
         {
-            try
-            {
-                task.Id = id;
-                TaskModel? findedTask = await _taskRepository.UpdateTaskByIdAsync(task, id);
+            TaskResponseDto updatedTask = await _taskService.UpdateTaskAsync(task, id);
 
-                if (findedTask == null)
-                    return NotFound("Task not found");
-
-                return Ok(findedTask);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in UpdateTaskAsync {ex}");
-                return StatusCode(500, ex.Message);
-            }
+            return StatusCode(200, updatedTask); 
         }
-        [HttpDelete("ById/{id}")]
-        public async Task<ActionResult<TaskModel>> DeleteTaskAsync(int id)
-        {
-            try
-            {
-                bool result = await _taskRepository.DeleteTaskByIdAsync(id);
 
-                if (!result)
-                    return NotFound("Task not found to be deleted");
-                
-                return Ok(result);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError($"Error in DeleteTaskAsync {ex}");
-                return StatusCode(500, ex.Message);
-            }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTaskAsync(Guid id)
+        {
+            bool result = await _taskService.RemoveTaskAsync(id);
+
+            return StatusCode(200, result);
         }
     }
 }

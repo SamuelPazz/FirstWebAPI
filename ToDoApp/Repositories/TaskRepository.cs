@@ -14,7 +14,7 @@ namespace ToDoApp.Repositories
             _dbContext = toDoAppDBContext;
         }
 
-        public async Task<TaskModel?> FindByIdAsync(int id)
+        public async Task<TaskModel?> FindByIdAsync(Guid id)
         {
             var result =  await _dbContext.Tasks
                 .Include(x => x.User)
@@ -49,7 +49,7 @@ namespace ToDoApp.Repositories
             return task;
         }
 
-        public async Task<TaskModel?> UpdateTaskByIdAsync(TaskModel task, int id)
+        public async Task<TaskModel?> UpdateTaskByIdAsync(TaskModel task, Guid id)
         {
             TaskModel? taskById = await FindByIdAsync(id);
 
@@ -67,7 +67,7 @@ namespace ToDoApp.Repositories
             return taskById;
         }
 
-        public async Task<bool> DeleteTaskByIdAsync(int id)
+        public async Task<bool> DeleteTaskByIdAsync(Guid id)
         {
             TaskModel? taskById = await FindByIdAsync(id);
 

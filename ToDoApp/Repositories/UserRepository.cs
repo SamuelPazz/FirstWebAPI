@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ToDoApp.Data;
 using ToDoApp.DTOs;
+using ToDoApp.DTOs.Requests;
 using ToDoApp.Models;
 using ToDoApp.Repositories.Interfaces;
 
@@ -18,22 +19,22 @@ namespace ToDoApp.Repositories
 
         public async Task<List<UserModel>?> FindAllUsersAsync()
         {
-            var result =  await _dbContext.Users.ToListAsync();
+            List<UserModel> users =  await _dbContext.Users.ToListAsync();
 
-            if (!result.Any()) 
+            if (!users.Any()) 
                 return null;
 
-            return result;
+            return users;
         }
 
         public async Task<UserModel?> FindByIdAsync(int id)
         {       
-            var result =  await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            UserModel? user =  await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
 
-            if (result == null)
+            if (user == null)
                 return null;
 
-            return result;
+            return user;
         }
 
         public async Task<UserModel?> SaveUserAsync(UserModel user)
@@ -79,7 +80,7 @@ namespace ToDoApp.Repositories
 
         public async Task<UserModel?> FindyByLogin(UserLoginDTO login)
         {
-            var user = await _dbContext.Users
+            UserModel? user = await _dbContext.Users
                 .FirstOrDefaultAsync(x => x.Email == login.Email && x.Password == login.Password);
 
             if (user == null)

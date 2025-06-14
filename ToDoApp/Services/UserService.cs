@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ToDoApp.Controllers;
-using ToDoApp.DTOs.Requests;
-using ToDoApp.DTOs.Responses;
 using ToDoApp.Exceptions;
 using ToDoApp.Models;
+using ToDoApp.Models.DTOs.Requests;
+using ToDoApp.Models.DTOs.Responses;
+using ToDoApp.Models.Mappers;
 using ToDoApp.Repositories.Interfaces;
 using ToDoApp.Services.Interfaces;
 
@@ -34,15 +35,10 @@ namespace ToDoApp.Services
                 return new List<UserResponseDto>();
             }
 
-            return users.Select(u => new UserResponseDto
-            {
-                Id = u.Id,
-                Name = u.Name,
-                Email = u.Email
-            }).ToList();
+            return users.Select(UserMapper.Of).ToList();
         }
 
-        public async Task<UserResponseDto> UserByIdAsync(int id)
+        public async Task<UserResponseDto> UserByIdAsync(Guid id)
         {
             UserModel? user = await _userRepository.FindByIdAsync(id);
 
@@ -52,17 +48,12 @@ namespace ToDoApp.Services
                 throw new NotFoundException($"User with id {id} not found.");
             }
 
-            return new UserResponseDto
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email
-            };
+            return UserMapper.Of(user);
         }
 
-        public async Task<UserResponseDto> CreateUserAsync(UserModel user)
+        public async Task<UserResponseDto> CreateUserAsync(UserCreateDto userCreateDto)
         {
-            UserModel? createdUser = await _userRepository.SaveUserAsync(user);
+            UserModel? createdUser = await _userRepository.SaveUserAsync(UserMapper.Of(userCreateDto));
 
             if (createdUser == null)
             {
@@ -70,17 +61,12 @@ namespace ToDoApp.Services
                 throw new BadRequestException("User creation failed.");
             }
 
-            return new UserResponseDto
-            {
-                Id = createdUser.Id,
-                Name = createdUser.Name,
-                Email = createdUser.Email
-            };
+            return UserMapper.Of(createdUser);
         }
 
-        public async Task<UserResponseDto> UpdateUserAsync(UserModel user, int id)
+        public async Task<UserResponseDto> UpdateUserAsync(UserUpdateDto userUpdateDto, Guid id)
         {
-            UserModel? updatedUser = await _userRepository.UpdateUserByIdAsync(user, id);
+            UserModel? updatedUser = await _userRepository.UpdateUserByIdAsync(UserMapper.Of(userUpdateDto), id);
 
             if (updatedUser == null)
             {
@@ -88,15 +74,10 @@ namespace ToDoApp.Services
                 throw new NotFoundException($"User with id {id} not found for update.");
             }
 
-            return new UserResponseDto
-            {
-                Id = updatedUser.Id,
-                Name = updatedUser.Name,
-                Email = updatedUser.Email
-            };
+            return UserMapper.Of(updatedUser);
         }
 
-        public async Task<bool> RemoveUserAsync(int id)
+        public async Task<bool> RemoveUserAsync(Guid id)
         {
             bool result = await _userRepository.DeleteUserByIdAsync(id);
 

@@ -1,15 +1,15 @@
-﻿using ToDoApp.DTOs.Requests;
-using ToDoApp.Models;
+﻿using ToDoApp.Models;
+using ToDoApp.Models.DTOs.Requests;
 
 namespace ToDoApp.Repositories.Interfaces
 {
     public interface IUserRepository
     {
         Task<List<UserModel>?> FindAllUsersAsync();
-        Task<UserModel?> FindByIdAsync(int id);
+        Task<UserModel?> FindByIdAsync(Guid id);
         Task<UserModel?> SaveUserAsync(UserModel user);
-        Task<UserModel?> UpdateUserByIdAsync(UserModel user, int id);
-        Task<bool> DeleteUserByIdAsync(int id);
+        Task<UserModel?> UpdateUserByIdAsync(UserModel user, Guid id);
+        Task<bool> DeleteUserByIdAsync(Guid id);
         Task<UserModel?> FindyByLogin(UserLoginDTO login);
     }
 }

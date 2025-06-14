@@ -2,7 +2,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using ToDoApp.DTOs.Responses;
 using ToDoApp.Models;
 
 namespace ToDoApp.Services

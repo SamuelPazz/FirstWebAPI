@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ToDoApp.DTOs;
-using ToDoApp.DTOs.Requests;
-using ToDoApp.DTOs.Responses;
 using ToDoApp.Models;
+using ToDoApp.Models.DTOs.Requests;
+using ToDoApp.Models.DTOs.Responses;
+using ToDoApp.Models.Mappers;
 using ToDoApp.Repositories.Interfaces;
 using ToDoApp.Services;
 using ToDoApp.Services.Interfaces;
@@ -34,34 +34,37 @@ namespace ToDoApp.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserByIdAsync(int id)
+        public async Task<IActionResult> GetUserByIdAsync(Guid id)
         {
             UserResponseDto user = await _userService.UserByIdAsync(id);
-            return Ok(user);
+            
+            return StatusCode(200, user);
         }
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> AddUserAsync([FromBody] UserModel user)
+        public async Task<IActionResult> AddUserAsync([FromBody] UserCreateDto userDto)
         {
-            UserResponseDto createdUser = await _userService.CreateUserAsync(user);
+            UserResponseDto createdUser = await _userService.CreateUserAsync(userDto);
+
             return StatusCode(201, createdUser);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUserAsync(int id, [FromBody] UserModel user)
+        public async Task<IActionResult> UpdateUserAsync(Guid id, [FromBody] UserUpdateDto userUpdateDto)
         {
-            UserResponseDto updatedUser = await _userService.UpdateUserAsync(user, id);
+            UserResponseDto updatedUser = await _userService.UpdateUserAsync(userUpdateDto, id);
             return StatusCode(200, updatedUser);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUserAsync(int id)
+        public async Task<IActionResult> DeleteUserAsync(Guid id)
         {
             bool result = await _userService.RemoveUserAsync(id);
             return StatusCode(200, result);
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] UserLoginDTO login)
         {

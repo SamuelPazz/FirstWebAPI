@@ -12,6 +12,9 @@ namespace ToDoApp.Data.Map
             builder.Property(x => x.Name).IsRequired().HasMaxLength(100);
             builder.Property(x => x.Email).IsRequired().HasMaxLength(100);
             builder.Property(x => x.Password).IsRequired().HasMaxLength(100);
+            builder.HasMany(x => x.Tasks)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId);
         }
     }
 }

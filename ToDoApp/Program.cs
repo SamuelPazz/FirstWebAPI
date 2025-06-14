@@ -7,6 +7,7 @@ using ToDoApp.Data;
 using ToDoApp.Repositories;
 using ToDoApp.Repositories.Interfaces;
 using ToDoApp.Services;
+using ToDoApp.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +54,9 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
+
 
 builder.Services.AddDbContext<ToDoAppDBContext>(options =>
     options.UseNpgsql(configuration.GetConnectionString("Database"))

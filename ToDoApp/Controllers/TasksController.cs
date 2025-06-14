@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ToDoApp.DTOs.Responses;
 using ToDoApp.Models;
 using ToDoApp.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using ToDoApp.Models.DTOs.Responses;
+using ToDoApp.Models.DTOs.Requests;
 
 namespace ToDoApp.Controllers
 {
@@ -38,17 +39,17 @@ namespace ToDoApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddTaskAsync([FromBody] TaskModel task)
+        public async Task<IActionResult> AddTaskAsync([FromBody] TaskCreateDto taskCreateDto)
         {
-            TaskResponseDto createdTask = await _taskService.CreateTaskAsync(task);
+            TaskResponseDto createdTask = await _taskService.CreateTaskAsync(taskCreateDto);
 
             return StatusCode(201, createdTask); 
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTaskAsync(Guid id, [FromBody] TaskModel task)
+        [HttpPut("{taskId}")]
+        public async Task<IActionResult> UpdateTaskAsync([FromBody] TaskUpdateDto taskUpdateDto, Guid taskId)
         {
-            TaskResponseDto updatedTask = await _taskService.UpdateTaskAsync(task, id);
+            TaskResponseDto updatedTask = await _taskService.UpdateTaskAsync(taskUpdateDto, taskId);
 
             return StatusCode(200, updatedTask); 
         }

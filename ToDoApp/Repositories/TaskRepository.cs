@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ToDoApp.Data;
+using ToDoApp.Exceptions;
 using ToDoApp.Models;
+using ToDoApp.Models.DTOs.Requests;
 using ToDoApp.Repositories.Interfaces;
 
 namespace ToDoApp.Repositories
@@ -59,9 +61,14 @@ namespace ToDoApp.Repositories
             taskById.Name = task.Name;
             taskById.Status = task.Status;
             taskById.Description = task.Description;
-            taskById.UserId = task.UserId;
 
-            _dbContext.Tasks.Update(taskById);
+            var userExists = await _dbContext.Users.AnyAsync(x => x.Id == task.UserId);
+            if (!userExists)
+                return null;
+
+            taskById.UserId = task.UserId;
+            taskById.User = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == task.UserId);
+
             await _dbContext.SaveChangesAsync();
 
             return taskById;

@@ -1,4 +1,5 @@
 ﻿using ToDoApp.Models;
+using ToDoApp.Models.DTOs.Requests;
 
 namespace ToDoApp.Repositories.Interfaces
 {

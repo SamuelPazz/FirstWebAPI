@@ -1,11 +1,13 @@
-﻿using ToDoApp.DTOs.Responses;
-using ToDoApp.Exceptions;
+﻿using ToDoApp.Exceptions;
 using ToDoApp.Models;
 using ToDoApp.Repositories.Interfaces;
 using ToDoApp.Services.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ToDoApp.Models.DTOs.Responses;
+using ToDoApp.Models.Mappers;
+using ToDoApp.Models.DTOs.Requests;
 
 namespace ToDoApp.Services
 {
@@ -30,20 +32,7 @@ namespace ToDoApp.Services
                 return new List<TaskResponseDto>();
             }
 
-            return tasks.Select(t => new TaskResponseDto
-            {
-                Id = t.Id,
-                Name = t.Name,
-                Description = t.Description,
-                Status = t.Status,
-                UserId = t.UserId,
-                User = t.User != null ? new UserResponseDto
-                {
-                    Id = t.User.Id,
-                    Name = t.User.Name,
-                    Email = t.User.Email
-                } : null
-            }).ToList();
+            return tasks.Select(TaskMapper.Of).ToList();
         }
 
         public async Task<TaskResponseDto> TaskByIdAsync(Guid id)
@@ -56,25 +45,12 @@ namespace ToDoApp.Services
                 throw new NotFoundException($"Task with id {id} not found.");
             }
 
-            return new TaskResponseDto
-            {
-                Id = task.Id,
-                Name = task.Name,
-                Description = task.Description,
-                Status = task.Status,
-                UserId = task.UserId,
-                User = task.User != null ? new UserResponseDto
-                {
-                    Id = task.User.Id,
-                    Name = task.User.Name,
-                    Email = task.User.Email
-                } : null
-            };
+            return TaskMapper.Of(task);
         }
 
-        public async Task<TaskResponseDto> CreateTaskAsync(TaskModel task)
+        public async Task<TaskResponseDto> CreateTaskAsync(TaskCreateDto taskCreateDto)
         {
-            TaskModel? createdTask = await _taskRepository.SaveTaskAsync(task);
+            TaskModel? createdTask = await _taskRepository.SaveTaskAsync(TaskMapper.Of(taskCreateDto));
 
             if (createdTask == null)
             {
@@ -82,47 +58,20 @@ namespace ToDoApp.Services
                 throw new BadRequestException("Task creation failed.");
             }
 
-            return new TaskResponseDto
-            {
-                Id = createdTask.Id,
-                Name = createdTask.Name,
-                Description = createdTask.Description,
-                Status = createdTask.Status,
-                UserId = createdTask.UserId,
-                User = createdTask.User != null ? new UserResponseDto
-                {
-                    Id = createdTask.User.Id,
-                    Name = createdTask.User.Name,
-                    Email = createdTask.User.Email
-                } : null
-            };
+            return TaskMapper.Of(createdTask);
         }
 
-        public async Task<TaskResponseDto> UpdateTaskAsync(TaskModel task, Guid id)
+        public async Task<TaskResponseDto> UpdateTaskAsync(TaskUpdateDto taskUpdateDto, Guid taskId)
         {
-            task.Id = id; 
-            TaskModel? updatedTask = await _taskRepository.UpdateTaskByIdAsync(task, id);
+            TaskModel? updatedTask = await _taskRepository.UpdateTaskByIdAsync(TaskMapper.Of(taskUpdateDto), taskId);
 
             if (updatedTask == null)
             {
-                _logger.LogError($"Task with id {id} not found for update.");
-                throw new NotFoundException($"Task with id {id} not found for update.");
+                _logger.LogError($"Task with id {taskId} or User with id {taskUpdateDto.UserId} not found for update task");
+                throw new NotFoundException($"Task with id {taskId} or User with id {taskUpdateDto.UserId} not found for update task");
             }
 
-            return new TaskResponseDto
-            {
-                Id = updatedTask.Id,
-                Name = updatedTask.Name,
-                Description = updatedTask.Description,
-                Status = updatedTask.Status,
-                UserId = updatedTask.UserId,
-                User = updatedTask.User != null ? new UserResponseDto
-                {
-                    Id = updatedTask.User.Id,
-                    Name = updatedTask.User.Name,
-                    Email = updatedTask.User.Email
-                } : null
-            };
+            return TaskMapper.Of(updatedTask);
         }
 
         public async Task<bool> RemoveTaskAsync(Guid id)

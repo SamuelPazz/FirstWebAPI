@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using ToDoApp.Data;
-using ToDoApp.DTOs;
-using ToDoApp.DTOs.Requests;
 using ToDoApp.Models;
+using ToDoApp.Models.DTOs.Requests;
 using ToDoApp.Repositories.Interfaces;
 
 namespace ToDoApp.Repositories
@@ -27,7 +26,7 @@ namespace ToDoApp.Repositories
             return users;
         }
 
-        public async Task<UserModel?> FindByIdAsync(int id)
+        public async Task<UserModel?> FindByIdAsync(Guid id)
         {       
             UserModel? user =  await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
 
@@ -48,7 +47,7 @@ namespace ToDoApp.Repositories
             return user;
         }
 
-        public async Task<UserModel?> UpdateUserByIdAsync(UserModel user, int id)
+        public async Task<UserModel?> UpdateUserByIdAsync(UserModel user, Guid id)
         {
             UserModel? userById = await FindByIdAsync(id);
 
@@ -57,15 +56,13 @@ namespace ToDoApp.Repositories
 
             userById.Name = user.Name;
             userById.Email = user.Email;
-            userById.Password = user.Password;
 
-            _dbContext.Users.Update(userById);
             await _dbContext.SaveChangesAsync();
 
             return userById;
         }
 
-        public async Task<bool> DeleteUserByIdAsync(int id)
+        public async Task<bool> DeleteUserByIdAsync(Guid id)
         {
             UserModel? userById = await FindByIdAsync(id);
 

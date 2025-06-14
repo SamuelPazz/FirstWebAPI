@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ToDoApp.DTOs.Requests
+namespace ToDoApp.Models.DTOs.Requests
 {
     public class UserLoginDTO
     {

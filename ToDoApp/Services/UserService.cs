@@ -15,10 +15,10 @@ namespace ToDoApp.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly JwtTokenService _jwtTokenService;
-        private readonly ILogger<UsersController> _logger;
+        private readonly IJwtTokenService _jwtTokenService;
+        private readonly ILogger<UserService> _logger;
 
-        public UserService(IUserRepository userRepository, JwtTokenService jwtTokenService, ILogger<UsersController> logger)
+        public UserService(IUserRepository userRepository, IJwtTokenService jwtTokenService, ILogger<UserService> logger)
         {
             _userRepository = userRepository;
             _jwtTokenService = jwtTokenService;
@@ -27,9 +27,9 @@ namespace ToDoApp.Services
 
         public async Task<List<UserResponseDto>> ListAllUsersAsync()
         {
-            List<UserModel>? users = await _userRepository.FindAllUsersAsync();
+            List<UserModel> users = await _userRepository.FindAllUsersAsync();
 
-            if (users == null || !users.Any())
+            if (users.Count < 1)
             {
                 _logger.LogError($"No users found");
                 return new List<UserResponseDto>();
@@ -53,7 +53,13 @@ namespace ToDoApp.Services
 
         public async Task<UserResponseDto> CreateUserAsync(UserCreateDto userCreateDto)
         {
-            UserModel? createdUser = await _userRepository.SaveUserAsync(UserMapper.Of(userCreateDto));
+
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(userCreateDto.Password);
+
+            UserModel user = UserMapper.Of(userCreateDto);
+            user.Password = hashedPassword;
+
+            UserModel? createdUser = await _userRepository.SaveUserAsync(user);
 
             if (createdUser == null)
             {
@@ -92,17 +98,16 @@ namespace ToDoApp.Services
 
         public async Task<string> LoginAndAuthenticationAsync(UserLoginDTO login)
         {
-            UserModel? user = await _userRepository.FindyByLogin(login);
+            UserModel? user = await _userRepository.FindyByEmailAsync(login.Email);
 
-            if (user == null)
+            if (user != null && BCrypt.Net.BCrypt.Verify(login.Password, user.Password))
             {
-                _logger.LogError($"User not found");
-                throw new NotFoundException("User not found");
+                string token = _jwtTokenService.GenerateTokenJWT(user);
+                return token;              
             }
 
-            string token = _jwtTokenService.GenerateTokenJWT(user);
-
-            return token;            
+            _logger.LogError("Invalid email or password");
+            throw new NotFoundException("Invalid email or password");
         }
     }
 }

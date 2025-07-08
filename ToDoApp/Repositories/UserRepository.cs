@@ -16,22 +16,15 @@ namespace ToDoApp.Repositories
             _dbContext = toDoAppDBContext;
         }
 
-        public async Task<List<UserModel>?> FindAllUsersAsync()
+        public async Task<List<UserModel>> FindAllUsersAsync()
         {
-            List<UserModel> users =  await _dbContext.Users.ToListAsync();
+            return await _dbContext.Users.ToListAsync();
 
-            if (!users.Any()) 
-                return null;
-
-            return users;
         }
 
         public async Task<UserModel?> FindByIdAsync(Guid id)
         {       
             UserModel? user =  await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
-
-            if (user == null)
-                return null;
 
             return user;
         }
@@ -49,7 +42,7 @@ namespace ToDoApp.Repositories
 
         public async Task<UserModel?> UpdateUserByIdAsync(UserModel user, Guid id)
         {
-            UserModel? userById = await FindByIdAsync(id);
+            UserModel? userById = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
 
             if (userById == null)
                 return null;
@@ -64,7 +57,7 @@ namespace ToDoApp.Repositories
 
         public async Task<bool> DeleteUserByIdAsync(Guid id)
         {
-            UserModel? userById = await FindByIdAsync(id);
+            UserModel? userById = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
 
             if (userById == null)
                 return false;
@@ -75,13 +68,10 @@ namespace ToDoApp.Repositories
             return true;
         }
 
-        public async Task<UserModel?> FindyByLogin(UserLoginDTO login)
+        public async Task<UserModel?> FindyByEmailAsync(string email)
         {
             UserModel? user = await _dbContext.Users
-                .FirstOrDefaultAsync(x => x.Email == login.Email && x.Password == login.Password);
-
-            if (user == null)
-                return null;
+                .FirstOrDefaultAsync(x => x.Email == email);
 
             return user;
         }

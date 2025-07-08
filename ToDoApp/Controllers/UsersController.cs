@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ToDoApp.Models;
 using ToDoApp.Models.DTOs.Requests;
 using ToDoApp.Models.DTOs.Responses;
-using ToDoApp.Models.Mappers;
-using ToDoApp.Repositories.Interfaces;
-using ToDoApp.Services;
 using ToDoApp.Services.Interfaces;
 
 namespace ToDoApp.Controllers

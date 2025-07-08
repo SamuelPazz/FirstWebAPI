@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ToDoApp.Models;
 using ToDoApp.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using ToDoApp.Models.DTOs.Responses;

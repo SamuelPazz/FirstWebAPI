@@ -24,9 +24,9 @@ namespace ToDoApp.Services
 
         public async Task<List<TaskResponseDto>> ListAllTasksAsync()
         {
-            List<TaskModel>? tasks = await _taskRepository.FindAllTasksAsync();
+            List<TaskModel> tasks = await _taskRepository.FindAllTasksAsync();
 
-            if (tasks == null || !tasks.Any())
+            if (tasks.Count < 1)
             {
                 _logger.LogError("No tasks found.");
                 return new List<TaskResponseDto>();

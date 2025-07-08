@@ -18,26 +18,16 @@ namespace ToDoApp.Repositories
 
         public async Task<TaskModel?> FindByIdAsync(Guid id)
         {
-            var result =  await _dbContext.Tasks
+            return await _dbContext.Tasks
                 .Include(x => x.User)
-                .FirstOrDefaultAsync(x => x.Id == id);
-
-            if (result == null)
-                return null;
-
-            return result;
+                .FirstOrDefaultAsync(x => x.Id == id);           
         }
 
-        public async Task<List<TaskModel>?> FindAllTasksAsync()
+        public async Task<List<TaskModel>> FindAllTasksAsync()
         {
-            var result = await _dbContext.Tasks
+            return await _dbContext.Tasks
                 .Include(x => x.User)
                 .ToListAsync();
-
-            if (!result.Any()) 
-                return null;
-
-            return result;
         }
 
         public async Task<TaskModel?> SaveTaskAsync(TaskModel task)
@@ -53,7 +43,7 @@ namespace ToDoApp.Repositories
 
         public async Task<TaskModel?> UpdateTaskByIdAsync(TaskModel task, Guid id)
         {
-            TaskModel? taskById = await FindByIdAsync(id);
+            TaskModel? taskById = await _dbContext.Tasks.FirstOrDefaultAsync(x => x.Id == id);
 
             if (taskById == null)
                 return null;
@@ -76,7 +66,7 @@ namespace ToDoApp.Repositories
 
         public async Task<bool> DeleteTaskByIdAsync(Guid id)
         {
-            TaskModel? taskById = await FindByIdAsync(id);
+            TaskModel? taskById = await _dbContext.Tasks.FirstOrDefaultAsync(x => x.Id == id);
 
             if (taskById == null)
                 return false;
